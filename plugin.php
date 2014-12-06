@@ -12,7 +12,6 @@ class BRHPasswordProtection extends KokenPlugin {
 	function __construct()
 	{
 		$this->register_filter('site.output', 'logins');		
-		$this->url = self::get_current_url();
 	}
 		
 	function logins( $html )
@@ -24,44 +23,33 @@ class BRHPasswordProtection extends KokenPlugin {
 		}
 		
 		// Make sure we have some login values set from the plugin settings
-		if( isset($this->data->logins) )
+		if( isset($this->data->pass) )
 		{
-			self::build_auth($this->data->logins);
-			
-			if( isset($this->data->email) )
+			// Check credentials & cookies against URL
+			if( self::is_valid_cookie() )
 			{
-				$this->email = $this->data->email;
+				return $html;
 			}
-			
-			// Check if page is password protected
-			if( self::is_protected_page() )
+			else
 			{
-				// Check credentials & cookies against URL
-				if( self::is_valid_cookie() )
+				// Here on a $_POST ?
+				if( isset($_POST['password']) )
 				{
-					return $html;
-				}
-				else
-				{
-					// Here on a $_POST ?
-					if( isset($_POST['password']) )
+					if( $this->data->pass == $_POST['password'] )
 					{
-						if( $this->auth_url[$this->url] == $_POST['password'] )
-						{
-							// Login successful, set cookie for two weeks
-							setcookie($this->cookie_name, $_POST['password'], time()+1209600);
-							return $html;
-						}
-						else
-						{
-							// Invalid, show login form again
-							return self::display_login_form($html, true);
-						}
+						// Login successful, set cookie for two weeks
+						setcookie($this->cookie_name, $_POST['password'], time()+1209600);
+						return $html;
+					}
+					else
+					{
+						// Invalid, show login form again
+						return self::display_login_form($html, true);
 					}
 				}
-				// Show login form
-				return self::display_login_form($html);
 			}
+			// Show login form
+			return self::display_login_form($html);
 		}
 		// Made it all the way here, show the full page
 		return $html;
@@ -87,20 +75,12 @@ class BRHPasswordProtection extends KokenPlugin {
 		return $_html;
 	}
 	
-	function is_protected_page()
-	{
-		// More flexibility on matching for the URL here?
-		return (array_key_exists('*', $this->auth_url) || array_key_exists($this->url, $this->auth_url));
-	}
-	
 	function is_valid_cookie()
 	{	
 		// Make sure cookie exists and contains the contents allow access to the current URL
 		// Cookie should be set to a password, make sure that password is allowed for the current URL
 		// TODO: make this work with multiple URL
-		return (isset($_COOKIE[$this->cookie_name]) && 
-				in_array($_COOKIE[$this->cookie_name], $this->auth_url) &&
-				$this->auth_url[$this->url] == $_COOKIE[$this->cookie_name]);
+		return (isset($_COOKIE[$this->cookie_name]));
 	}
 		
 	function login_form($failed=false)
@@ -118,78 +98,12 @@ class BRHPasswordProtection extends KokenPlugin {
 
 		$output .=
 				'<form method="POST" action="'.$_SERVER["REQUEST_URI"].'">'.
-				'<input type="text" name="password" placeholder="Password" />'.
+				'<input type="password" name="password" placeholder="Password" />'.
 				'<input type="Submit" value="Login" />'.
 				'</form>';
-
-		if( !empty($this->email) )
-		{
-			$output .= '<br/><p>Please email '.$this->email.' for access.</p>';
-		}
 
 		$output .= '</div>';
 		
 		return $output;
-	}
-	
-	// Build array of login data with url access
-	// User => Pass
-	function build_auth( $data )
-	{
-		$ret = array();
-		
-		$data = explode($this->separator_eol, $data);
-		foreach( $data as $d )
-		{
-			$entry = explode($this->separator, $d);
-
-			list($url, $pass) = $entry;
-			
-			// Force leading slash for URL matching
-			if( $url[0] != '/' )
-			{
-				$url = '/'.$url;
-			}
-			
-			$ret[$url] = $pass; 
-		}
-		
-		$this->auth_url = $ret;
-	} 
-	
-	// Lifted from app/site/site.php
-	function get_current_url()
-	{
-		// If this isn't set, they have enabled URL rewriting for purty links and arrived here directly
-		// (not through /index.php/this/that)
-		if (!isset($rewrite))
-		{
-			$rewrite = true;
-			$raw_url = $_GET['url'];
-		}
-		else
-		{
-			if (isset($_SERVER['QUERY_STRING']) && strpos($_SERVER['QUERY_STRING'], '/') === 0)
-			{
-				$raw_url = $_SERVER['QUERY_STRING'];
-			}
-			else if (isset($_SERVER['PATH_INFO']))
-			{
-				$raw_url = $_SERVER['PATH_INFO'];
-			}
-			else if (isset($_SERVER['REQUEST_URI']))
-			{
-				$raw_url = $_SERVER['REQUEST_URI'];
-			}
-			else if (isset($_SERVER['ORIG_PATH_INFO']))
-			{
-				$raw_url = $_SERVER['ORIG_PATH_INFO'];
-			}
-			else
-			{
-				$raw_url = '/';
-			}
-		}
-		return $raw_url;
 	}
 }

@@ -8,14 +8,9 @@
 		"link": "http://benhays.com"
 	},
 	"data": {
-		"logins": {
-			"label": "Pages & Passwords",
-			"info": "URL and password separated by '|'. Each URL|Password should be separated by ','. The URL should not include the domain, and should only be the directory or album name.",
-			"type": "text"
-		},
-		"email": {
-			"label": "Contact Email",
-			"info": "Email address to show on login form for access, will not show if blank.",
+		"pass": {
+			"label": "Public Password",
+			"info": "This is the password that covers the whole site",
 			"type": "string"
 		}
 	}

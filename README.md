@@ -1,9 +1,11 @@
 Koken Password Protection
 =========================
 
-Plugin for [Koken](http://koken.me) to allow password protection on a per URL basis.
+The plugin was forked from https://github.com/bhays/brh-password-protection which allows multiple url password combinations. I wanted something a little simpler with just one password that covered the whole install.
 
-This is by no means secure, but it does restrict access to content. Depending on your theme, there may be many ways to get to the same content. In this event, you will need to define multiple URLs or change your theme setup.
+Plugin for [Koken](http://koken.me) to allow password protection for the whole install.
+
+This is by no means secure, but it does restrict access to content.
 
 **Note** this plugin is currently incompatable with template caching, you will need to uncheck that option in Settings -> Site Publishing
 
@@ -22,37 +24,6 @@ Installation
 
 2. Sign in to Koken, then visit the Settings > Plugins page to activate the plugin.
 
-3. Once activated, click the Setup button and then add the URL and passwords of your choice.
+3. Once activated, click the Setup button and add a passwords of your choice.
 
-4. Add your email address to display at the end of the password form for people to contact you for access.
-
-5. Make sure Template Caching is disabled under Settings -> Site Publishing.
-
-Usage Notes
-------------
-
-- URL and password separated by `|`
-
-- Each URL`|`Password should be separated by `,` 
-
-- The URL should not include the domain, and should only be the end of the URL (See examples below)
-
-- A URL can only be defined once
-
-- Only one password is saved at a time, so if you would like multiple URLs protected with only one login, use the same password
-
-- Passwords cannot contain the `|` or `,` characters included, or things will break.
-
-
-Examples
-------------
-
-Protect the page `http://koken.me/gallery` with password `letmein`
-
-    gallery|letmein
-    
-Now also protect the page `http://koken.me/essays/22` with password `supersecret`
-
-    gallery|letmein,essays/22|supersecret
-
-
+4. Make sure Template Caching is disabled under Settings -> Site Publishing.
